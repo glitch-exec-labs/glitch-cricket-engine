@@ -1,0 +1,79 @@
+name: Light Checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile core IPL modules
+        run: python -m py_compile modules/shared_core.py modules/match_recorder.py modules/paper_simulator.py modules/risk_manager.py
+
+      - name: Smoke test shared payload and staking flow
+        run: |
+          python - <<'PY'
+          from modules.match_recorder import MatchRecorder
+          from modules.paper_simulator import PaperSimulator
+          from modules.risk_manager import RiskManager
+
+          class DummyState:
+              current_innings = 1
+              overs_completed = 10.2
+              total_runs = 88
+              wickets = 3
+
+          rm = RiskManager({"bankroll_usd": 1000.0, "fractional_kelly": 0.25, "min_ev_pct": 5.0})
+          recommendation = rm.build_staking_recommendation(8.0, 2.0, market="6_over")
+          assert recommendation.stake == 20.0
+
+          recorder = MatchRecorder(db_path="/tmp/ipl_match_recorder_ci.db")
+          recorder.record_signal(
+              match_id=123,
+              state=DummyState(),
+              signal_type="SESSION",
+              market="10_over",
+              direction="UNDER",
+              line=92.5,
+              odds=1.91,
+              model_expected=88.0,
+              model_std_dev=7.5,
+              ev_pct=6.5,
+              edge_runs=4.5,
+              confidence="HIGH",
+              action="SENT",
+              competition="ipl",
+          )
+          assert recorder.get_stats()["signals"] == 1
+          recorder.close()
+
+          paper = PaperSimulator(bankroll=100000.0, db_path="/tmp/ipl_paper_ci.db")
+          ref = paper.place_bet(
+              match_id=123,
+              home="RCB",
+              away="CSK",
+              venue="Chennai",
+              competition="ipl",
+              innings=1,
+              market="10_over",
+              direction="UNDER",
+              line=92.5,
+              odds=1.91,
+              ev_pct=8.0,
+              trigger="CI",
+          )
+          assert ref is not None
+          assert paper.get_status()["total_bets"] == 1
+          PY
