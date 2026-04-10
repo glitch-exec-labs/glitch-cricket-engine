@@ -12,6 +12,8 @@ from __future__ import annotations
 import time
 from typing import Any
 
+from modules.shared_core import kelly_fraction_from_edge
+
 
 class RiskManager:
     """Manages bankroll, stake sizing, and risk limits for live betting."""
@@ -94,9 +96,7 @@ class RiskManager:
             return 0.0
 
         bankroll = bankroll if bankroll is not None else self.bankroll_usd
-        ev = ev_pct / 100.0
-        kelly_fraction = ev / (odds - 1.0)
-        kelly_fraction *= self.fractional_kelly
+        kelly_fraction = kelly_fraction_from_edge(ev_pct, odds, self.fractional_kelly)
         stake = bankroll * kelly_fraction
 
         # Scale by market type

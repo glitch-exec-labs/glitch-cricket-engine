@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
+from modules.shared_core import kelly_fraction_from_edge
 from modules.bet_executor import BetExecutor, LiveBet
 
 CLOUDBET_BALANCE_URL = "https://sports-api.cloudbet.com/pub/v1/account/currencies/{currency}/balance"
@@ -233,7 +234,7 @@ class MultiBetExecutor:
                 return 0.0
 
             fractional_kelly = float(executor.config.get("fractional_kelly", 0.25))
-            raw_kelly = (ev_pct / 100.0) / (odds - 1.0) * fractional_kelly
+            raw_kelly = kelly_fraction_from_edge(ev_pct, odds, fractional_kelly)
 
             # Market multiplier (mirrors RiskManager.MARKET_STAKE_MULT)
             _mkt_mult = {
