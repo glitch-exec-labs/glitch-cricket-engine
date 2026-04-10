@@ -7,6 +7,8 @@ Design: Clean premium-channel signals for cricket betting.
 
 from typing import Any, Dict, List, Optional
 
+from modules.shared_core import decimal_to_probability
+
 # ── Signal & cricket emoji ────────────────────────────────────────────
 YES  = "🟢"         # session YES / OVER / BACK
 NO   = "🔴"         # session NO / UNDER / LAY
@@ -454,7 +456,7 @@ def _format_signal(sig: Dict[str, Any]) -> str:
         odds = sig.get("odds", 0)
         ev_pct = sig.get("ev_pct", 0)
         fair_prob = sig.get("fair_prob", 0)
-        implied = 1 / odds if odds > 0 else 0
+        implied = decimal_to_probability(odds) if odds > 1.0 else 0
         stake = sig.get("stake", 0)
         return (
             f"{icon} SIGNAL: Lagai {team} @ {odds:.2f}\n"
@@ -652,7 +654,7 @@ def format_mw_call(
     away: str,
 ) -> str:
     """Premium match winner signal — clean, actionable, hedge-aware."""
-    implied = 1 / odds if odds > 0 else 0
+    implied = decimal_to_probability(odds) if odds > 1.0 else 0
     edge_pp = (fair_prob - implied) * 100
 
     backed_tag = team_tag(team)

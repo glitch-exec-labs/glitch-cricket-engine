@@ -17,6 +17,8 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
+from modules.shared_core import kelly_fraction_from_edge
+
 logger = logging.getLogger("ipl_spotter.paper_sim")
 
 _SCHEMA = """
@@ -152,8 +154,7 @@ class PaperSimulator:
         if ev_pct < MIN_EV_PCT or odds <= 1.0:
             return 0.0
 
-        ev = ev_pct / 100.0
-        kelly = ev / (odds - 1.0) * FRACTIONAL_KELLY
+        kelly = kelly_fraction_from_edge(ev_pct, odds, FRACTIONAL_KELLY)
         stake = self.bankroll * kelly
 
         # Market multiplier
