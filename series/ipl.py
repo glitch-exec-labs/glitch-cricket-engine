@@ -1,0 +1,40 @@
+"""IPL (Indian Premier League) series profile."""
+
+from series.profile import SeriesProfile
+
+IPL_PROFILE = SeriesProfile(
+    series_key="ipl",
+    display_name="Indian Premier League",
+    entry_edge=0.05,
+    exit_edge=0.02,
+    min_edge_balls=3,
+    min_edge_balls_powerplay=5,
+    reversal_edge_jump=0.12,
+    signal_min_edge_runs=2.0,
+    autobet_min_edge_runs=4.0,
+    signal_min_ev_pct=5.0,
+    autobet_min_ev_pct=10.0,
+    cooldown_match_winner_s=60,
+    cooldown_session_s=90,
+    cooldown_innings_total_s=120,
+    cooldown_over_runs_s=30,
+    signal_direction_cooldown_s=900,
+    signal_flip_min_edge=15.0,
+    speed_edge_direction_cooldown_s=600,
+    speed_edge_flip_override_edge=20.0,
+    model_max_shift_per_scan=15.0,
+    fractional_kelly=0.25,
+    max_position_size_usd=25.0,
+    max_open_bets=10,
+    min_odds=1.30,
+    max_odds=5.00,
+    daily_loss_limit_usd=50.0,
+    session_autobet_min_overs_6=2.0,
+    session_autobet_min_overs_10=4.0,
+    session_autobet_min_overs_15=7.0,
+    session_autobet_early_ev=20.0,
+    innings_total_min_overs=10.0,
+    innings_total_max_overs_inn1=19.0,
+    innings_total_max_overs_inn2=17.0,
+    alert_on_edge_only=True,            # v2: disable auto-betting, signals + odds only
+)

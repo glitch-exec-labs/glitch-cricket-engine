@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+
+# Runtime logs and PIDs
+logs/
+*.log
+*.pid
+bot.pid
+
+# Local databases and state
+data/
+*.db
+*.db-shm
+*.db-wal
+*.session
+
+# Secrets and local config
+.env
+.env.*
+ipl_spotter_config.json
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+
+# Temp / inspection helpers
+*_temp.py
+noop_temp.py
+repro_predict_temp.py

@@ -1,0 +1,19 @@
+[Unit]
+Description=IPL Live Line Listener
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=support
+WorkingDirectory=/home/support/workspace/ipl_bot
+ExecStart=/home/support/workspace/ipl_bot/venv/bin/python /home/support/workspace/ipl_bot/liveline_bot.py
+Restart=always
+RestartSec=10
+KillSignal=SIGINT
+TimeoutStopSec=30
+StandardOutput=append:/home/support/workspace/ipl_bot/logs/liveline.out.log
+StandardError=append:/home/support/workspace/ipl_bot/logs/liveline.err.log
+
+[Install]
+WantedBy=multi-user.target

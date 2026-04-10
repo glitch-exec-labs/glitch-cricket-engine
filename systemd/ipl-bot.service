@@ -1,0 +1,19 @@
+[Unit]
+Description=IPL Edge Spotter Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=support
+WorkingDirectory=/home/support/workspace/ipl_bot
+ExecStart=/home/support/workspace/ipl_bot/venv/bin/python /home/support/workspace/ipl_bot/spotter.py
+Restart=always
+RestartSec=10
+KillSignal=SIGINT
+TimeoutStopSec=30
+StandardOutput=append:/home/support/workspace/ipl_bot/logs/spotter.out.log
+StandardError=append:/home/support/workspace/ipl_bot/logs/spotter.err.log
+
+[Install]
+WantedBy=multi-user.target
