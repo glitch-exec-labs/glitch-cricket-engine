@@ -1,0 +1,29 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1020"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="210" y1="110" x2="980" y2="530" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f97316"/>
+      <stop offset="1" stop-color="#dc2626"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <circle cx="1080" cy="120" r="180" fill="#f97316" fill-opacity="0.18"/>
+  <circle cx="180" cy="560" r="220" fill="#dc2626" fill-opacity="0.14"/>
+  <rect x="84" y="84" width="1112" height="472" rx="30" fill="#0F172A" fill-opacity="0.84" stroke="rgba(255,255,255,0.10)"/>
+  <rect x="116" y="116" width="250" height="42" rx="21" fill="url(#accent)"/>
+  <text x="141" y="144" fill="#F8FAFC" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">GLITCH EXECUTOR</text>
+  <text x="116" y="262" fill="#F8FAFC" font-family="Arial, Helvetica, sans-serif" font-size="68" font-weight="800">GLITCH CRICKET ENGINE</text>
+  <text x="116" y="320" fill="#CBD5E1" font-family="Arial, Helvetica, sans-serif" font-size="28">Live cricket analysis for IPL and PSL with scenario modeling, recorder tooling, and paper simulation.</text>
+  <rect x="116" y="396" width="270" height="54" rx="27" fill="#111827" stroke="rgba(255,255,255,0.12)"/>
+  <text x="146" y="431" fill="#E2E8F0" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">ipl + psl analysis</text>
+  <rect x="862" y="166" width="246" height="246" rx="28" fill="#0B1222" stroke="rgba(255,255,255,0.10)"/>
+  <rect x="904" y="208" width="162" height="18" rx="9" fill="url(#accent)"/>
+  <rect x="904" y="246" width="120" height="18" rx="9" fill="#334155"/>
+  <rect x="904" y="284" width="146" height="18" rx="9" fill="#334155"/>
+  <rect x="904" y="340" width="92" height="92" rx="20" fill="url(#accent)" fill-opacity="0.90"/>
+  <text x="927" y="401" fill="#F8FAFC" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="800">G</text>
+  <text x="116" y="500" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="22">Open-source project family • Apache 2.0 • github.com/glitch-executor</text>
+</svg>
