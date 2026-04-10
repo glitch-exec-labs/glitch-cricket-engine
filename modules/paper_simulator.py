@@ -17,7 +17,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from modules.shared_core import kelly_fraction_from_edge
+from modules.shared_core import StakingRecommendation, recommend_stake_from_edge
 
 logger = logging.getLogger("ipl_spotter.paper_sim")
 
@@ -150,24 +150,35 @@ class PaperSimulator:
 
     # ── Stake sizing ─────────────────────────────────────────────────
 
+    def build_staking_recommendation(self, ev_pct: float, odds: float, market: str = "") -> StakingRecommendation:
+        market_multiplier = MARKET_MULTIPLIERS.get(market, 1.0)
+        if ev_pct < MIN_EV_PCT or odds <= 1.0 or self.bankroll <= 0.0:
+            return StakingRecommendation(
+                stake=0.0,
+                kelly_fraction=0.0,
+                recommended_fraction=0.0,
+                bankroll=max(self.bankroll, 0.0),
+                edge_percent=ev_pct,
+                decimal_odds=odds,
+                market_multiplier=market_multiplier,
+                capped=False,
+                min_stake_met=False,
+            )
+
+        return recommend_stake_from_edge(
+            edge_percent=ev_pct,
+            decimal_odds=odds,
+            bankroll=self.bankroll,
+            fraction=FRACTIONAL_KELLY,
+            market_multiplier=market_multiplier,
+            max_bankroll_fraction=MAX_POSITION_PCT,
+            max_stake=MAX_POSITION_USD,
+            min_stake=MIN_STAKE_USD,
+        )
+
     def calculate_stake(self, ev_pct: float, odds: float, market: str = "") -> float:
-        if ev_pct < MIN_EV_PCT or odds <= 1.0:
-            return 0.0
-
-        kelly = kelly_fraction_from_edge(ev_pct, odds, FRACTIONAL_KELLY)
-        stake = self.bankroll * kelly
-
-        # Market multiplier
-        stake *= MARKET_MULTIPLIERS.get(market, 1.0)
-
-        # Caps
-        stake = min(stake, self.bankroll * MAX_POSITION_PCT)
-        stake = min(stake, MAX_POSITION_USD)
-
-        if stake < MIN_STAKE_USD:
-            return 0.0
-
-        return round(stake, 2)
+        recommendation = self.build_staking_recommendation(ev_pct, odds, market)
+        return recommendation.stake
 
     # ── Bet placement ────────────────────────────────────────────────
 

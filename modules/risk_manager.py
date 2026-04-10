@@ -10,9 +10,10 @@ Pure Python, no external dependencies.
 from __future__ import annotations
 
 import time
+from dataclasses import replace
 from typing import Any
 
-from modules.shared_core import kelly_fraction_from_edge
+from modules.shared_core import StakingRecommendation, recommend_stake_from_edge
 
 
 class RiskManager:
@@ -75,6 +76,55 @@ class RiskManager:
         "match_winner": 0.8,
     }
 
+    def build_staking_recommendation(
+        self,
+        ev_pct: float,
+        odds: float,
+        bankroll: float | None = None,
+        market: str = "",
+    ) -> StakingRecommendation:
+        """Return a reusable staking recommendation for the current market state."""
+        bankroll = bankroll if bankroll is not None else self.bankroll_usd
+        market_mult = self.MARKET_STAKE_MULT.get(market, 1.0)
+
+        if ev_pct < self.min_ev_pct or odds <= 1.0 or bankroll <= 0.0:
+            return StakingRecommendation(
+                stake=0.0,
+                kelly_fraction=0.0,
+                recommended_fraction=0.0,
+                bankroll=max(bankroll, 0.0),
+                edge_percent=ev_pct,
+                decimal_odds=odds,
+                market_multiplier=market_mult,
+                capped=False,
+                min_stake_met=False,
+            )
+
+        recommendation = recommend_stake_from_edge(
+            edge_percent=ev_pct,
+            decimal_odds=odds,
+            bankroll=bankroll,
+            fraction=self.fractional_kelly,
+            market_multiplier=market_mult,
+            max_stake=self.max_position_size_usd,
+            min_stake=self.min_stake_usd,
+        )
+
+        if self.default_stake_usd > 0:
+            floor = self.default_stake_usd * market_mult
+            if floor <= bankroll:
+                floored_stake = min(max(recommendation.stake, floor), self.max_position_size_usd)
+                if floored_stake >= self.min_stake_usd and floored_stake != recommendation.stake:
+                    recommendation = replace(
+                        recommendation,
+                        stake=round(floored_stake, 2),
+                        recommended_fraction=round(floored_stake, 2) / bankroll,
+                        capped=floored_stake >= self.max_position_size_usd,
+                        min_stake_met=True,
+                    )
+
+        return recommendation
+
     def calculate_stake(
         self,
         ev_pct: float,
@@ -82,44 +132,14 @@ class RiskManager:
         bankroll: float | None = None,
         market: str = "",
     ) -> float:
-        """Return optimal stake in USD using fractional Kelly criterion.
-
-        Scales stake based on market type:
-          10/15-over sessions → larger (safer, more data)
-          single-over bets → smaller (volatile)
-
-        Returns 0.0 if EV is below the minimum threshold.
-        """
-        if ev_pct < self.min_ev_pct:
-            return 0.0
-        if odds <= 1.0:
-            return 0.0
-
-        bankroll = bankroll if bankroll is not None else self.bankroll_usd
-        kelly_fraction = kelly_fraction_from_edge(ev_pct, odds, self.fractional_kelly)
-        stake = bankroll * kelly_fraction
-
-        # Scale by market type
-        market_mult = self.MARKET_STAKE_MULT.get(market, 1.0)
-        stake *= market_mult
-
-        # Apply default stake as floor if configured — but only when the floor
-        # doesn't exceed the available bankroll. With a depleted primary bankroll
-        # ($0.31) we must NOT inflate the stake beyond what can actually be placed;
-        # client accounts size their own bets independently via _get_account_stake.
-        if self.default_stake_usd > 0:
-            floor = self.default_stake_usd * market_mult
-            if floor <= bankroll:
-                stake = max(stake, floor)
-
-        # Cap at max position size
-        stake = min(stake, self.max_position_size_usd)
-
-        # Floor at configured minimum
-        if stake < self.min_stake_usd:
-            return 0.0
-
-        return round(stake, 2)
+        """Return optimal stake in USD using the shared staking recommendation flow."""
+        recommendation = self.build_staking_recommendation(
+            ev_pct=ev_pct,
+            odds=odds,
+            bankroll=bankroll,
+            market=market,
+        )
+        return recommendation.stake
 
     # ── pre-bet checks ────────────────────────────────────────────────────
 
