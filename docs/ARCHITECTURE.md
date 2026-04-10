@@ -1,51 +1,56 @@
-# Cricket Engine Architecture
+# Architecture
 
 ## High-Level Flow
 
 1. External providers deliver live match, fixture, squad, and venue context.
-2. `MatchState` converts feed payloads into a consistent internal state.
-3. `InningsState` derives resources still available in the match.
+2. `MatchState` converts provider payloads into a consistent internal state.
+3. `InningsState` derives batting depth, tail strength, remaining batting quality, and bowling resources.
 4. Scenario and chase modules estimate how the next phase of the innings can branch.
 5. `Predictor` produces session, innings, and match-winner views.
-6. Context rules suppress low-quality or contradictory outputs.
-7. Signals, recorder data, and paper-trade traces are persisted for review.
+6. `match_context` rules suppress low-quality or contradictory outputs.
+7. Recorder, Telegram, and review systems preserve the analysis trail.
 
-## Main Runtime Components
+## Runtime Layers
 
-### `spotter.py`
-Owns the live scan loop, provider orchestration, prediction calls, signal gating, Telegram dispatch, and recording.
+### Ingestion
+- Sportmonks and adjacent provider clients fetch fixtures, live score, squads, and metadata.
+- Weather and auxiliary context enrich pre-match or mid-match interpretation.
 
-### `modules/match_state.py`
-Normalizes raw provider data into a stable live state object.
+### State Normalization
+- `modules/match_state.py`
+- `modules/innings_state.py`
 
-### `modules/innings_state.py`
-Derives batting depth, tail strength, remaining batting quality, and bowling resources.
+This layer exists so downstream logic works from a stable internal representation instead of raw provider payloads.
 
-### `modules/scenario_model.py`
-Projects forward by branching on likely wicket and run outcomes rather than relying on a single linear pace extrapolation.
+### Projection
+- `modules/predictor.py`
+- `modules/scenario_model.py`
+- `modules/wicket_hazard.py`
+- `modules/chase_state.py`
 
-### `modules/chase_state.py`
-Classifies second-innings chases into pressure bands so signal quality bars can adapt to game state.
+This is where the engine moves beyond plain scoreboard projection toward scenario-aware reasoning.
 
-### `modules/predictor.py`
-Blends baseline heuristics, resource adjustments, and the newer scenario/chase layers into session and innings views.
+### Context and Consistency
+- `modules/match_context.py`
+- `modules/player_context.py`
+- `modules/match_dossier.py`
 
-### `modules/match_context.py`
-Contains contradiction rules and qualitative vetoes that stop the engine from emitting low-quality or internally inconsistent takes.
+These modules provide vetoes, contradiction checks, and context enrichments that stop low-quality analysis from leaking into signals.
 
-## Design Intent
+### Output and Review
+- `modules/telegram_bot.py`
+- `modules/match_recorder.py`
+- `modules/paper_simulator.py`
+- `modules/shadow_tracker.py`
 
-This engine is being moved from a pure "bet executor" mindset toward an "analysis-first" model. That means:
+Even when live execution is not the goal, the review and recording infrastructure is useful because it creates a feedback loop around model behavior.
 
-- more emphasis on explainable state
-- more emphasis on model review and paper traces
-- less emphasis on blind execution
-- tighter feedback loops between live decisions and post-match review
+## Design Direction
 
-## Current Gaps
+The project is moving from an execution-first bot toward an analysis-first engine.
 
-- reproducible dependency setup is still thinner than the live server reality
-- some ML paths need stronger validation and feature alignment
-- matchup-level cricket reasoning can still go deeper
-
-Those gaps are real, but the runtime architecture already supports iterative improvement without a full rewrite.
+That means:
+- more emphasis on explainable live state
+- more emphasis on reviewability and signal quality
+- less emphasis on blind automation
+- better preservation of project knowledge in docs and recorded traces

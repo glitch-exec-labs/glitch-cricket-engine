@@ -1,42 +1,29 @@
 # Glitch Cricket Engine
 
+![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
-![Coverage](https://img.shields.io/badge/coverage-live%20analysis-1f6feb)
-![Markets](https://img.shields.io/badge/markets-IPL%20%7C%20PSL-brightgreen)
-![Mode](https://img.shields.io/badge/mode-analysis%20first-orange)
+![Coverage](https://img.shields.io/badge/focus-live%20cricket%20analysis-1f6feb)
+![Competitions](https://img.shields.io/badge/competitions-IPL%20%7C%20PSL-brightgreen)
+![Project](https://img.shields.io/badge/project-analysis%20engine-orange)
 
-A live cricket intelligence engine for IPL and PSL matches. It ingests live match state, enriches it with player, venue, and innings context, runs projection layers on top of that state, and turns the result into structured match analysis and Telegram-ready signals.
+Live cricket intelligence for IPL and PSL matches. Glitch Cricket Engine ingests live match state, enriches it with player, venue, and innings context, runs multiple projection layers on top of that state, and turns the result into structured analysis and Telegram-ready outputs.
 
-This codebase started life as a live-betting system and still contains execution, shadow-tracking, and paper-simulation infrastructure. The current direction is sharper than that: evolve the bot into a stronger cricket analysis engine with better state modeling, cleaner feedback loops, and more trustworthy projections.
+This repository is published as an open-source working system, while preserving the original Glitch project identity and authorship.
 
-## Why This Exists
+## Why This Repo Exists
 
-Cricket bots often stop at score extrapolation: current run rate, wickets, venue average, projected total. That gets you a number, but it misses match script. This engine pushes deeper by combining:
+A lot of cricket bots stop at scoreboard extrapolation: current run rate, wickets, venue average, projected total. That gets you a number, but not a trustworthy read on match script.
 
-- live score and ball state
-- batting resources left
-- bowling resources left
-- chase pressure state
-- scenario branching on wicket risk
-- consistency rules across innings/session signals
-- recorded outcomes for later review
+Glitch Cricket Engine exists to go one layer deeper:
+- normalize live match state into a stable internal model
+- reason about batting and bowling resources still available
+- project sessions and innings through context-aware logic
+- classify chase pressure, contradictions, and regime changes
+- preserve a review trail through recording and simulation infrastructure
 
-The goal is not just to say *what the projected number is*, but also *why the game is tilting that way*.
+The goal is not just to estimate a total, but to explain why the game is bending in a particular direction.
 
-## Core Capabilities
-
-- Live match ingestion and normalization via `MatchState`
-- Session projections for `6_over`, `10_over`, `15_over`, `20_over`, and `innings_total`
-- Match-winner estimation for chase and first-innings scenarios
-- Resource-aware innings modeling via `InningsState`
-- Scenario-tree forecasting with wicket branching
-- Chase-state classification with pressure bands
-- Match-context veto and contradiction checks
-- Telegram-ready formatting for signals and analysis
-- Match recording, signal history, and paper-trading traces for review
-- Competition-aware fixture support for IPL and PSL
-
-## Architecture
+## System Overview
 
 ```mermaid
 flowchart LR
@@ -49,42 +36,48 @@ flowchart LR
     C --> F
     F --> G[Signal + Analysis Pipeline]
     G --> H[Telegram]
-    G --> I[Recorder / Review Data]
+    G --> I[Recorder / Review Layer]
 ```
 
-More detail: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+## Main Components
 
-## Example Output
+- `spotter.py`
+  The main live scan loop and decision pipeline.
+- `liveline_bot.py`
+  The live line listener and side-channel event consumer.
+- `modules/`
+  Prediction, state, context, provider clients, analysis helpers, and legacy execution/paper infrastructure.
+- `series/`
+  Competition-specific profiles and registry logic.
+- `scripts/`
+  Data-building, reporting, and diagnostics helpers.
+- `tests/`
+  Unit and integration-oriented tests.
+- `systemd/`
+  Service definitions used in the server deployment.
+
+See also:
+- [Architecture](docs/ARCHITECTURE.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Platform Map](docs/PLATFORM_MAP.md)
+- [Strategy Matrix](docs/STRATEGY_MATRIX.md)
+- [Setup and Security](docs/SETUP_AND_SECURITY.md)
+
+## Repository Structure
 
 ```text
-🏏 15 Over
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔴 NO  126 runs
-💵 Stake: 20% of match capital
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔺 Islamabad United  🆚  🟣 Quetta Gladiators
-  Score: 77/2 (9.1 ov) RR:8.4 | Need 107 off 10.9 ov (target 184)
+modules/      prediction, context, providers, state, recorder, utilities
+series/       competition profiles and registry
+scripts/      model/data utilities and reporting helpers
+tests/        automated checks
+docs/         public project docs
+systemd/      deployment service files
 ```
 
-What sits behind a message like that:
-- live innings state
-- over-phase weighting
-- batting depth left
-- wicket hazard assumptions
-- chase regime / pressure band
-- context checks to avoid contradictory calls
-
-## Repository Guide
-
-- `spotter.py`: main live scan loop and signal pipeline
-- `liveline_bot.py`: live line listener and side-channel updates
-- `modules/`: prediction, state, context, and integrations
-- `series/`: competition-specific profiles and registry
-- `scripts/`: model building, diagnostics, and reporting helpers
-- `tests/`: unit and integration-oriented tests
-- `systemd/`: server service definitions
-- `ipl_spotter_config.example.json`: sanitized runtime config template
-- `docs/`: setup, security, and architecture notes
+Local module guides:
+- [modules/README.md](modules/README.md)
+- [scripts/README.md](scripts/README.md)
+- [series/README.md](series/README.md)
 
 ## Quick Start
 
@@ -112,69 +105,77 @@ cp ipl_spotter_config.example.json ipl_spotter_config.json
 
 Fill in your own provider keys and environment-specific values in `ipl_spotter_config.json`.
 
-### 4. Start the main engine
+### 4. Run the main engine
 
 ```bash
 python spotter.py
 ```
 
-### 5. Start the line listener
+### 5. Run the live line listener
 
 ```bash
 python liveline_bot.py
 ```
 
-## Analysis Stack
+## Usage Orientation
 
-The current engine is layered rather than single-formula:
+This repository still contains execution-era components such as Cloudbet, paper simulation, and shadow tracking because they provide review and validation value. For public use, the cleanest way to think about the repo is:
 
-1. `MatchState`
-- normalizes live scoreboard and player state
+1. live state ingestion
+2. state enrichment
+3. projection and scenario analysis
+4. context gating
+5. output / recording
 
-2. `InningsState`
-- estimates batting depth, remaining quality, and bowling resources
+You can use it as:
+- a live analysis engine
+- a signal-generation base
+- a cricket modeling research platform
+- a reviewable paper-analysis workflow
 
-3. Scenario + chase layers
-- scenario tree branches on wicket risk
-- chase state machine classifies the innings into pressure bands
+## Branding and Attribution
 
-4. Predictor
-- blends historical baselines with live resources and scenario output
+Glitch Cricket Engine is the original project identity for this repository.
 
-5. Context rules
-- suppress contradictory or low-quality signals
+For forks and downstream distributions:
+- keep `LICENSE`
+- keep `NOTICE`
+- preserve original attribution in a reasonable visible place
 
-## Status Today
+Apache 2.0 allows broad reuse, but it does not grant trademark rights beyond what the license expressly allows.
 
-What is already strong:
-- live state ingestion
-- signal pipeline wiring
-- analysis/reporting flow
-- resource-aware innings logic
-- scenario/chase modeling integration
+## Licensing
 
-What is still evolving:
-- ML feature alignment and reproducibility
-- deeper batter-vs-bowler matchup modeling
-- cleaner dependency setup for fresh installs
-- broader public-facing documentation and tests
-
-## Security and Setup
-
-This repository is intentionally published without live secrets, runtime logs, databases, or local virtual environments.
+This project is released under the Apache License 2.0.
 
 See:
-- [docs/SETUP_AND_SECURITY.md](docs/SETUP_AND_SECURITY.md)
+- [LICENSE](LICENSE)
+- [NOTICE](NOTICE)
+- [AUTHORS.md](AUTHORS.md)
+
+## Public Release Safety
+
+This public repository intentionally excludes:
+- live credentials and local config
+- runtime logs and pid files
+- state databases and session files
+- virtual environments
+- local training or model artifacts under ignored runtime paths
+
+The shared config template is:
 - [ipl_spotter_config.example.json](ipl_spotter_config.example.json)
 
-## Roadmap
+## Status
 
-- Stronger over-by-over scenario modeling
-- Better wicket hazard calibration
-- Cleaner chase-script reasoning in innings 2
-- Improved public install reproducibility
-- Richer review tooling for signal quality and model drift
+Strong already:
+- live state ingestion
+- session and innings analysis flow
+- resource-aware state modeling
+- scenario and chase-layer integration
+- review-oriented recorder infrastructure
 
-## License / Usage
-
-This repo is currently published as a working project codebase, not a packaged open-source library. Review and adapt it carefully before using it in a production environment.
+Still evolving:
+- ML feature alignment and reproducibility
+- deeper batter-vs-bowler and bowler resource logic
+- cleaner fresh-install setup
+- broader public documentation and CI maturity

@@ -3,10 +3,17 @@ __pycache__/
 *.py[cod]
 *.so
 .pytest_cache/
+.coverage
+htmlcov/
 
 # Virtual environments
 venv/
 .venv/
+
+# Build / package outputs
+build/
+dist/
+artifacts/
 
 # Runtime logs and PIDs
 logs/
@@ -26,6 +33,15 @@ data/
 .env.*
 ipl_spotter_config.json
 
+# Model and dataset artifacts
+*.joblib
+*.pkl
+*.bin
+*.onnx
+*.xgb
+*.parquet
+*.jsonl
+
 # OS/editor noise
 .DS_Store
 Thumbs.db
@@ -34,3 +50,6 @@ Thumbs.db
 *_temp.py
 noop_temp.py
 repro_predict_temp.py
+
+# macOS metadata
+._*
