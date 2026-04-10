@@ -19,6 +19,8 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
+from modules.shared_core import SignalPayload, StakingRecommendation
+
 logger = logging.getLogger("ipl_spotter.match_recorder")
 
 
@@ -243,6 +245,40 @@ class MatchRecorder:
         """
         now = datetime.now(timezone.utc).isoformat()
         try:
+            payload = SignalPayload(
+                dedupe_key=f"{match_id}|{state.current_innings}|{market}|{direction}|{line}",
+                market_type=market,
+                selection=direction,
+                line=line,
+                edge_pct=ev_pct / 100.0 if ev_pct else 0.0,
+                stake_recommendation=StakingRecommendation(
+                    stake=stake,
+                    kelly_fraction=0.0,
+                    recommended_fraction=0.0,
+                    bankroll=0.0,
+                    edge_percent=ev_pct,
+                    decimal_odds=odds if odds > 0 else 0.0,
+                    market_multiplier=1.0,
+                    capped=False,
+                    min_stake_met=stake > 0,
+                ),
+                metadata={
+                    "match_id": match_id,
+                    "competition": competition,
+                    "innings": state.current_innings,
+                    "overs": state.overs_completed,
+                    "score": state.total_runs,
+                    "wickets": state.wickets,
+                    "signal_type": signal_type,
+                    "model_expected": model_expected,
+                    "model_std_dev": model_std_dev,
+                    "edge_runs": edge_runs,
+                    "confidence": confidence,
+                    "action": action,
+                    "suppression_reason": suppression_reason,
+                    "bet_ref": bet_ref,
+                },
+            ).to_dict()
             self.conn.execute(
                 """INSERT INTO signal_log
                    (timestamp, match_id, competition, innings, overs, score, wickets,
@@ -254,9 +290,9 @@ class MatchRecorder:
                     now, match_id, competition,
                     state.current_innings, state.overs_completed,
                     state.total_runs, state.wickets,
-                    signal_type, market, direction, line, odds,
-                    model_expected, model_std_dev, ev_pct, edge_runs, confidence,
-                    action, suppression_reason, bet_ref, stake,
+                    payload["signal_type"], payload["market_type"], payload["selection"], payload["line"], odds,
+                    payload["model_expected"], payload["model_std_dev"], ev_pct, payload["edge_runs"], payload["confidence"],
+                    payload["action"], payload["suppression_reason"], payload["bet_ref"], payload["stake_amount"],
                 ),
             )
             self.conn.commit()

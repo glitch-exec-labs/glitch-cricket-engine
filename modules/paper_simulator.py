@@ -17,7 +17,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from modules.shared_core import StakingRecommendation, recommend_stake_from_edge
+from modules.shared_core import ExecutionPayload, StakingRecommendation, recommend_stake_from_edge
 
 logger = logging.getLogger("ipl_spotter.paper_sim")
 
@@ -221,7 +221,8 @@ class PaperSimulator:
                     and b.get("innings") == innings):
                 return None
 
-        stake = self.calculate_stake(ev_pct, odds, market)
+        recommendation = self.build_staking_recommendation(ev_pct, odds, market)
+        stake = recommendation.stake
         if stake <= 0:
             return None
 
@@ -266,10 +267,24 @@ class PaperSimulator:
             "PAPER BET: %s %s %s line=%.1f odds=%.2f stake=$%.0f ev=%.1f%% [%s vs %s]",
             market, direction, line, odds, stake, ev_pct, home, away,
         )
-        self._log_event("BET_PLACED", self.bankroll, {
-            "ref": ref_id, "market": market, "direction": direction,
-            "line": line, "odds": odds, "stake": stake,
-        })
+        execution_payload = ExecutionPayload(
+            stake_currency="USD",
+            stake_recommendation=recommendation,
+            metadata={
+                "ref": ref_id,
+                "match_id": match_id,
+                "market": market,
+                "direction": direction,
+                "line": line,
+                "odds": odds,
+                "home": home,
+                "away": away,
+                "competition": competition,
+                "innings": innings,
+                "trigger": trigger,
+            },
+        ).to_dict()
+        self._log_event("BET_PLACED", self.bankroll, execution_payload)
         return ref_id
 
     # ── Settlement ───────────────────────────────────────────────────

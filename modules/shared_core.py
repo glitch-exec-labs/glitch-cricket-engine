@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import os
 import sys
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -17,6 +18,50 @@ class StakingRecommendation:
     market_multiplier: float = 1.0
     capped: bool = False
     min_stake_met: bool = True
+
+
+@dataclass(frozen=True)
+class SignalPayload:
+    dedupe_key: str
+    market_type: str
+    selection: str
+    line: float | None
+    edge_pct: float
+    stake_recommendation: StakingRecommendation
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        payload = dict(self.metadata)
+        payload.update(
+            {
+                "dedupe_key": self.dedupe_key,
+                "market_type": self.market_type,
+                "selection": self.selection,
+                "line": self.line,
+                "edge_pct": self.edge_pct,
+                "stake_amount": self.stake_recommendation.stake,
+                "stake_recommendation": asdict(self.stake_recommendation),
+            }
+        )
+        return payload
+
+
+@dataclass(frozen=True)
+class ExecutionPayload:
+    stake_currency: str
+    stake_recommendation: StakingRecommendation
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        payload = dict(self.metadata)
+        payload.update(
+            {
+                "stake_amount": self.stake_recommendation.stake,
+                "stake_currency": self.stake_currency,
+                "stake_recommendation": asdict(self.stake_recommendation),
+            }
+        )
+        return payload
 
 
 def _candidate_core_paths() -> list[Path]:
@@ -36,7 +81,7 @@ for candidate in _candidate_core_paths():
 try:
     from glitch_betting_core.odds import decimal_to_probability
     from glitch_betting_core.staking import kelly_fraction_from_edge, recommend_stake_from_edge
-    from glitch_betting_core.types import StakingRecommendation
+    from glitch_betting_core.types import ExecutionPayload, SignalPayload, StakingRecommendation
 except ImportError:
     def decimal_to_probability(decimal_odds: float) -> float:
         if decimal_odds <= 1.0:
