@@ -7,9 +7,9 @@
 ![Competitions](https://img.shields.io/badge/competitions-IPL%20%7C%20PSL-brightgreen)
 ![Project](https://img.shields.io/badge/project-analysis%20engine-orange)
 
-Live cricket intelligence for IPL and PSL matches. Glitch Cricket Engine ingests live match state, enriches it with player, venue, and innings context, runs multiple projection layers on top of that state, and turns the result into structured analysis and Telegram-ready outputs.
+Live cricket intelligence engine for IPL and PSL with scenario modeling, match-state analysis, recorder tooling, and paper simulation.
 
-This repository is published as an open-source working system, while preserving the original Glitch project identity and authorship.
+Glitch Cricket Engine turns live match state into structured cricket intelligence: innings context, projection layers, chase pressure, contradiction checks, and reviewable outputs that are useful both for analysis and for paper-first workflow validation.
 
 ## Why This Repo Exists
 
@@ -142,7 +142,7 @@ This repository is part of the Glitch engine family:
 - [Glitch Cricket Engine](https://github.com/glitch-executor/glitch-cricket-engine)
 - [Glitch NBA Engine](https://github.com/glitch-executor/glitch-nba-engine)
 
-A branded social preview asset is included at `assets/social-preview.svg` for GitHub repo settings, link previews, or launch posts.
+GitHub-ready social preview assets are included at `assets/social-preview.png` and `assets/social-preview.svg` for repo settings, link previews, or launch posts.
 
 ## Branding and Attribution
 
