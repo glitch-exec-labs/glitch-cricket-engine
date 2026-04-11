@@ -145,7 +145,7 @@ def git_push(message: str) -> bool:
     """Stage all changes, commit, and push to origin/main."""
     env = os.environ.copy()
     env["GIT_SSH_COMMAND"] = (
-        "ssh -i /home/support/.ssh/github_ipl_bot "
+        "ssh -i /home/support/.ssh/github_ml_data "
         "-o StrictHostKeyChecking=no "
         "-o BatchMode=yes"
     )
