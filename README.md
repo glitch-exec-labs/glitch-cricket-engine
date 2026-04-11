@@ -3,9 +3,9 @@
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
 ![Checks](https://github.com/glitch-executor/glitch-cricket-engine/actions/workflows/light-checks.yml/badge.svg)
-![Coverage](https://img.shields.io/badge/focus-live%20cricket%20analysis-1f6feb)
-![Competitions](https://img.shields.io/badge/competitions-IPL%20%7C%20PSL-brightgreen)
-![Project](https://img.shields.io/badge/project-analysis%20engine-orange)
+![Family](https://img.shields.io/badge/family-glitch%20engine-111827?logo=github&logoColor=white)
+![Domain](https://img.shields.io/badge/domain-cricket%20%7C%20live-00c27a)
+![Scope](https://img.shields.io/badge/scope-IPL%20%7C%20PSL%20%7C%20simulation-16a34a)
 
 Live cricket intelligence engine for IPL and PSL with scenario modeling, match-state analysis, recorder tooling, and paper simulation.
 
