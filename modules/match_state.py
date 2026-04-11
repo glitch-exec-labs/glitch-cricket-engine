@@ -311,7 +311,8 @@ class MatchState:
                 overs_float = float(summary.get("overs", state.overs_completed) or state.overs_completed)
                 state.overs_completed = overs_float
                 completed_overs = int(overs_float)
-                current_ball = int(round((overs_float - completed_overs) * 10))
+                current_ball = int((overs_float - completed_overs) * 10)
+                current_ball = min(current_ball, 6)
                 state.current_over = completed_overs
                 state.current_ball = current_ball
                 state.balls_faced = completed_overs * 6 + current_ball

@@ -664,11 +664,18 @@ class IPLEdgeSpotter:
             try:
                 phase_runs = {}
                 if hasattr(state, "phase_runs") and state.phase_runs:
-                    phase_runs = {
-                        "pp_inn1": state.phase_runs.get("powerplay", 0),
-                        "mid_inn1": state.phase_runs.get("middle", 0),
-                        "death_inn1": state.phase_runs.get("death", 0),
-                    }
+                    if state.current_innings == 1:
+                        phase_runs = {
+                            "pp_inn1": state.phase_runs.get("powerplay", 0),
+                            "mid_inn1": state.phase_runs.get("middle", 0),
+                            "death_inn1": state.phase_runs.get("death", 0),
+                        }
+                    else:
+                        phase_runs = {
+                            "pp_inn2": state.phase_runs.get("powerplay", 0),
+                            "mid_inn2": state.phase_runs.get("middle", 0),
+                            "death_inn2": state.phase_runs.get("death", 0),
+                        }
 
                 summary = self._get_cricdata_match_summary(home, away, comp)
                 batting_cards = summary.get("batting_cards") or self._build_state_batting_cards(state, home)
@@ -2444,11 +2451,11 @@ class IPLEdgeSpotter:
         for key in price_keys:
             value = market_data.get(key)
             try:
-                if float(value) > 0:
-                    return True
+                if float(value) <= 0:
+                    return False
             except (TypeError, ValueError):
-                continue
-        return False
+                return False
+        return True
 
     def _has_live_speed_market(self, cloudbet_odds: dict | None) -> bool:
         if not isinstance(cloudbet_odds, dict):

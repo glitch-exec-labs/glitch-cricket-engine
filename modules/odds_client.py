@@ -220,6 +220,9 @@ class OddsClient:
         if not parsed_selections:
             return None
 
+        if home_odds <= 0 or away_odds <= 0:
+            return None
+
         return {
             "market": "match_winner",
             "selections": parsed_selections,
