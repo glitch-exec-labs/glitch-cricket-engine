@@ -37,21 +37,53 @@ logger = logging.getLogger("ml_exporter")
 BOT_DIR = Path(__file__).resolve().parent.parent
 DATA_REPO = Path("/home/support/workspace/ipl_ml_data")
 
-# Map: (source_db, table_name) -> output csv path (relative to DATA_REPO)
-EXPORTS = [
-    ("ml_training_v2.db",     "real_over_snapshots",  "ball_by_ball/real_over_snapshots.csv"),
-    ("ml_training.db",        "over_snapshots",        "ball_by_ball/over_snapshots.csv"),
-    ("ml_training.db",        "match_outcomes",        "ball_by_ball/match_outcomes.csv"),
-    ("match_replay.db",       "ball_log",              "ball_by_ball/ball_log.csv"),
-    ("match_replay.db",       "scan_snapshots",        "ball_by_ball/scan_snapshots.csv"),
-    ("match_replay.db",       "signal_log",            "ball_by_ball/signal_log.csv"),
-    ("series_ipl_2026.db",    "series_matches",        "series/series_matches.csv"),
-    ("series_ipl_2026.db",    "series_batting",        "series/series_batting.csv"),
-    ("series_ipl_2026.db",    "series_bowling",        "series/series_bowling.csv"),
-    ("ipl_stats.db",          "player_innings",        "series/player_innings.csv"),
-    ("ipl_stats.db",          "bowler_innings",        "series/bowler_innings.csv"),
-    ("ipl_stats.db",          "matches",               "series/historical_matches.csv"),
+# Static exports — ML training DBs and replay logs
+STATIC_EXPORTS = [
+    ("ml_training_v2.db",  "real_over_snapshots", "ball_by_ball/real_over_snapshots.csv"),
+    ("ml_training.db",     "over_snapshots",       "ball_by_ball/over_snapshots.csv"),
+    ("ml_training.db",     "match_outcomes",       "ball_by_ball/match_outcomes.csv"),
+    ("match_replay.db",    "ball_log",             "ball_by_ball/ball_log.csv"),
+    ("match_replay.db",    "scan_snapshots",       "ball_by_ball/scan_snapshots.csv"),
+    ("match_replay.db",    "signal_log",           "ball_by_ball/signal_log.csv"),
 ]
+
+# Historical stats DBs — auto-discovered by naming convention *_stats.db
+# e.g. ipl_stats.db, psl_stats.db, bbl_stats.db
+STATS_TABLES = ["matches", "player_innings", "bowler_innings"]
+
+# Series DBs auto-discovered: series_<comp>_<year>.db
+# Tables: series_matches, series_batting, series_bowling
+SERIES_TABLES = ["series_matches", "series_batting", "series_bowling"]
+
+
+def build_exports() -> list[tuple[str, str, str]]:
+    """Build full export list dynamically, discovering all series and stats DBs."""
+    exports = list(STATIC_EXPORTS)
+    data_dir = BOT_DIR / "data"
+
+    # Auto-discover series_<comp>_<year>.db files
+    for db_file in sorted(data_dir.glob("series_*.db")):
+        db_name = db_file.name
+        # Parse competition and year from filename: series_ipl_2026.db
+        parts = db_file.stem.split("_")  # ["series", "ipl", "2026"]
+        if len(parts) < 3:
+            continue
+        comp = parts[1]   # ipl, psl, bbl, etc.
+        year = parts[2]
+        for table in SERIES_TABLES:
+            csv_name = f"{table}.csv"
+            out_path = f"series/{comp}/{year}/{csv_name}"
+            exports.append((db_name, table, out_path))
+
+    # Auto-discover *_stats.db files (ipl_stats.db, psl_stats.db, etc.)
+    for db_file in sorted(data_dir.glob("*_stats.db")):
+        db_name = db_file.name
+        comp = db_file.stem.replace("_stats", "")  # ipl, psl
+        for table in STATS_TABLES:
+            out_path = f"series/{comp}/historical/{table}.csv"
+            exports.append((db_name, table, out_path))
+
+    return exports
 
 
 def export_table(db_path: Path, table: str, out_path: Path) -> int:
@@ -146,10 +178,13 @@ def git_push(message: str) -> bool:
 
 
 def main() -> int:
-    logger.info("=== IPL ML Data Export started ===")
+    logger.info("=== Cricket ML Data Export started ===")
+
+    exports = build_exports()
+    logger.info("Exporting %d tables across all competitions", len(exports))
 
     total_rows: dict[str, int] = {}
-    for db_name, table, csv_rel in EXPORTS:
+    for db_name, table, csv_rel in exports:
         db_path = BOT_DIR / "data" / db_name
         out_path = DATA_REPO / csv_rel
         count = export_table(db_path, table, out_path)
