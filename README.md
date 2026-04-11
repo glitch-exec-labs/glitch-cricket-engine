@@ -9,7 +9,17 @@
 
 Live cricket intelligence engine for IPL and PSL with scenario modeling, match-state analysis, recorder tooling, and paper simulation.
 
-Glitch Cricket Engine turns live match state into structured cricket intelligence: innings context, projection layers, chase pressure, contradiction checks, and reviewable outputs that are useful both for analysis and for paper-first workflow validation.
+Glitch Cricket Engine turns live match state into structured cricket intelligence: innings context, projection layers, chase pressure, contradiction checks, and reviewable outputs for analysis and paper-first validation.
+
+## Glitch Engine Family
+
+```mermaid
+flowchart LR
+    A[Glitch Betting Core] --> B[Glitch Cricket Engine]
+    A --> C[Glitch NBA Engine]
+    B --> D[Live Cricket Analysis]
+    C --> E[Pregame NBA Intelligence]
+```
 
 ## Why This Repo Exists
 
