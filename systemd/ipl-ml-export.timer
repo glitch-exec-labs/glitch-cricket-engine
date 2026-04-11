@@ -1,0 +1,12 @@
+[Unit]
+Description=Run IPL ML data export daily at 18:00 UTC (11:30 PM IST) — after matches end
+
+[Timer]
+# 18:00 UTC = 23:30 IST — safely after the late match finishes
+OnCalendar=*-*-* 18:00:00 UTC
+# If the server was down at trigger time, run as soon as it comes back up
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,12 @@
+[Unit]
+Description=IPL ML Data Export — dump DBs to CSV and push to GitHub
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=support
+WorkingDirectory=/home/support/workspace/ipl_bot
+ExecStart=/home/support/workspace/ipl_bot/venv/bin/python /home/support/workspace/ipl_bot/scripts/export_ml_data.py
+StandardOutput=append:/home/support/workspace/ipl_bot/logs/ml_export.log
+StandardError=append:/home/support/workspace/ipl_bot/logs/ml_export.log
