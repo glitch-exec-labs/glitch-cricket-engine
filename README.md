@@ -2,7 +2,7 @@
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
-![Checks](https://github.com/glitch-executor/glitch-cricket-engine/actions/workflows/light-checks.yml/badge.svg)
+![Checks](https://github.com/glitch-exec-labs/glitch-cricket-engine/actions/workflows/light-checks.yml/badge.svg)
 ![Family](https://img.shields.io/badge/family-glitch%20engine-111827?logo=github&logoColor=white)
 ![Domain](https://img.shields.io/badge/domain-cricket%20%7C%20live-00c27a)
 ![Scope](https://img.shields.io/badge/scope-IPL%20%7C%20PSL%20%7C%20simulation-16a34a)
@@ -95,7 +95,7 @@ Local module guides:
 ### 1. Clone
 
 ```bash
-git clone git@github.com:glitch-executor/glitch-cricket-engine.git
+git clone git@github.com:glitch-exec-labs/glitch-cricket-engine.git
 cd glitch-cricket-engine
 ```
 
@@ -148,9 +148,9 @@ You can use it as:
 
 This repository is part of the Glitch engine family:
 
-- [Glitch Betting Core](https://github.com/glitch-executor/glitch-betting-core)
-- [Glitch Cricket Engine](https://github.com/glitch-executor/glitch-cricket-engine)
-- [Glitch NBA Engine](https://github.com/glitch-executor/glitch-nba-engine)
+- [Glitch Betting Core](https://github.com/glitch-exec-labs/glitch-betting-core)
+- [Glitch Cricket Engine](https://github.com/glitch-exec-labs/glitch-cricket-engine)
+- [Glitch NBA Engine](https://github.com/glitch-exec-labs/glitch-nba-engine)
 
 GitHub-ready social preview assets are included at `assets/social-preview.png` and `assets/social-preview.svg` for repo settings, link previews, or launch posts.
 
