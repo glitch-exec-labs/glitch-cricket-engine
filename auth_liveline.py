@@ -6,11 +6,21 @@ After that, the bot can read the live line channel automatically.
 """
 
 import asyncio
+import os
+import sys
 from telethon import TelegramClient
 
-API_ID = 35087526
-API_HASH = "4fa10426d6e5836677ac1a51145d5c57"
-CHANNEL = "https://t.me/+Su8-m-kbsbUdpcPM"
+# NOTE (2026-04-17): credentials were previously hardcoded here and leaked
+# publicly. They have been removed. When reactivating this project, create a
+# fresh Telegram app at https://my.telegram.org/apps and export:
+#   TELEGRAM_API_ID, TELEGRAM_API_HASH, LIVELINE_CHANNEL
+# The old hardcoded values must be considered compromised — do NOT reuse them.
+API_ID = int(os.environ["TELEGRAM_API_ID"]) if os.environ.get("TELEGRAM_API_ID") else None
+API_HASH = os.environ.get("TELEGRAM_API_HASH")
+CHANNEL = os.environ.get("LIVELINE_CHANNEL")
+
+if not (API_ID and API_HASH and CHANNEL):
+    sys.exit("Missing env vars: TELEGRAM_API_ID, TELEGRAM_API_HASH, LIVELINE_CHANNEL")
 
 async def main():
     client = TelegramClient("data/liveline_session", API_ID, API_HASH)
